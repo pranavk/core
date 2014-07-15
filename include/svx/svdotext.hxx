@@ -596,6 +596,7 @@ public:
         const drawinglayer::geometry::ViewInformation2D& aViewInformation) const;
 
     void impCopyTextInTextObj(SdrTextObj *pNextTextObj) const;
+    void embedText() const;
 
     // timing generators
     void impGetBlinkTextTiming(drawinglayer::animation::AnimationEntryList& rAnimList) const;
