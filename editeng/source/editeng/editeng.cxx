@@ -2755,6 +2755,11 @@ EditPaM EditEngine::InsertLineBreak(const EditSelection& rEditSelection)
     return pImpEditEngine->InsertLineBreak(rEditSelection);
 }
 
+sal_Int32 EditEngine::GetOverflowingParaNum() const {
+    return pImpEditEngine->GetOverflowingParaNum();
+}
+
+
 EFieldInfo::EFieldInfo()
 {
     pFieldItem = NULL;

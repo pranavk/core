@@ -478,6 +478,9 @@ private:
     sal_uInt32          nCurTextHeightNTP;  // without trailing empty paragraphs
     sal_uInt16          nOnePixelInRef;
 
+    // For Chaining
+    sal_Int32 mnOverflowingPara = -1;
+
     IdleFormattter      aIdleFormatter;
 
     Timer               aOnlineSpellTimer;
@@ -1028,6 +1031,9 @@ public:
     /// specifies if auto-correction should capitalize the first word or not (default is on)
     void            SetFirstWordCapitalization( bool bCapitalize )  { bFirstWordCapitalization = bCapitalize; }
     bool            IsFirstWordCapitalization() const   { return bFirstWordCapitalization; }
+
+    sal_Int32 GetOverflowingParaNum() const { return mnOverflowingPara; }
+    void SetOverflowingParaNum(sal_Int32 nPara) { mnOverflowingPara = nPara; }
 };
 
 inline EPaM ImpEditEngine::CreateEPaM( const EditPaM& rPaM )

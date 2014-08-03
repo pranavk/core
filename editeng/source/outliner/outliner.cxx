@@ -2095,7 +2095,13 @@ OutlinerParaObject *Outliner::GetNonOverflowingParaObject() const
 
     // XXX: returns first paragraph
     sal_Int32 nStartPara = 0;
-    sal_Int32 nCount = 1;
+    sal_Int32 nCount = pEditEngine->GetOverflowingParaNum()-1;
+    //sal_Int32 nCount = 1;
+
+    if ( nCount == 0 ) // Only overflowing text
+        return NULL;
+    else if (nCount < 0) // No overflowing Text
+        nCount = GetParagraphCount();
 
     // code inspired from Outliner::CreateParaObject
 
@@ -2119,11 +2125,15 @@ OutlinerParaObject *Outliner::GetNonOverflowingParaObject() const
 }
 OutlinerParaObject *Outliner::GetOverflowingParaObject() const
 {
+    if ( pEditEngine->GetOverflowingParaNum() )
+    return CreateParaObject( pEditEngine->GetOverflowingParaNum() );
+    /*
     // XXX: returns second paragraph if there is one, first otherwise
     if ( GetParagraphCount() >= 2 )
         return CreateParaObject(1, 1);
     else
         return CreateParaObject(0, 1);
+    */
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
