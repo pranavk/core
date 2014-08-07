@@ -604,6 +604,7 @@ public:
     bool Redo(EditView* pView);
 
     sal_Int32 GetOverflowingParaNum() const;
+    void ClearOverflowingParaNum();
 };
 
 #endif // INCLUDED_EDITENG_EDITENG_HXX
