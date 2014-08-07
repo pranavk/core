@@ -480,6 +480,7 @@ private:
 
     // For Chaining
     sal_Int32 mnOverflowingPara = -1;
+    void SetOverflowingParaNum();
 
     IdleFormattter      aIdleFormatter;
 
