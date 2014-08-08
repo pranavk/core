@@ -2093,9 +2093,9 @@ OutlinerParaObject *Outliner::GetNonOverflowingParaObject() const
     if ( GetParagraphCount() < 1 )
         return NULL;
 
-    // XXX: returns first paragraph
     sal_Int32 nStartPara = 0;
-    sal_Int32 nCount = pEditEngine->GetOverflowingParaNum()-1;
+    // last non-overflowing paragraph is before the first overflowing one
+    sal_Int32 nCount = pEditEngine->GetOverflowingParaNum();
     //sal_Int32 nCount = 1;
 
     if ( nCount == 0 ) // Only overflowing text
@@ -2125,7 +2125,7 @@ OutlinerParaObject *Outliner::GetNonOverflowingParaObject() const
 }
 OutlinerParaObject *Outliner::GetOverflowingParaObject() const
 {
-    if ( pEditEngine->GetOverflowingParaNum() )
+    if ( pEditEngine->GetOverflowingParaNum() >= 0)
         return CreateParaObject( pEditEngine->GetOverflowingParaNum() );
 
     return NULL;
