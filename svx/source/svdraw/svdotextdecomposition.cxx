@@ -752,6 +752,7 @@ void SdrTextObj::impCopyTextInTextObj(SdrTextObj *pNextTextObj) const
             )
      );
     rOutliner.SetUpdateMode(true);
+    rOutliner.SetStatusEventHdl1(LINK(this,SdrObjEditView,ImpOutlinerStatusEventHdl));
     rOutliner.SetText(*mpOverflowingText);  // XXX: copies overflown text
     Size aNewSize(rOutliner.CalcTextSize());
     // create OutlinerParaObject for pNextTextObj
@@ -767,11 +768,10 @@ void SdrTextObj::impCopyTextInTextObj(SdrTextObj *pNextTextObj) const
     pNextTextObj->ImpJustifyRect(aNewRect);
     if (aNewRect!=aNextRect) {
         pNextTextObj->SetLogicRect(aNewRect);
-
-
-        // Set text object's string
-        pNextTextObj->SetOutlinerParaObject( pNewParaObject );
     }
+    // Set text object's string
+    pNextTextObj->SetOutlinerParaObject( pNewParaObject );
+
 }
 
 void SdrTextObj::impDecomposeAutoFitTextPrimitive(
