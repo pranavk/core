@@ -736,6 +736,7 @@ OutlinerParaObject *SdrTextObj::impGetNonOverflowingParaObject() const
         pEdtOutl->GetNonOverflowingText();
     SdrOutliner &rOutliner = ImpGetDrawOutliner();
     rOutliner.Clear();
+    rOutliner.SetStyleSheet( 0, pEdtOutl->GetStyleSheet(0));
 
     if (pNonOverflowingTxt->mPreOverflowingTxt == "" &&
         pNonOverflowingTxt->mpHeadParas != NULL) {
@@ -748,6 +749,7 @@ OutlinerParaObject *SdrTextObj::impGetNonOverflowingParaObject() const
         rOutliner.SetText(pNonOverflowingTxt->mPreOverflowingTxt, pTmpPara0);
         OutlinerParaObject *pPObj = rOutliner.CreateParaObject();
         rOutliner.Clear();
+        rOutliner.SetStyleSheet( 0, pEdtOutl->GetStyleSheet(0));
 
         if (pNonOverflowingTxt->mpHeadParas != NULL)
             rOutliner.SetText(*pNonOverflowingTxt->mpHeadParas);
