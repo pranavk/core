@@ -621,7 +621,7 @@ public:
     void impLeaveOnlyNonOverflowingText() const;
 
     // Handler for Chained Text
-    DECL_LINK(ImpDecomposeChainedText,bool);
+    DECL_LINK(ImpDecomposeChainedText,bool*);
 
     // timing generators
     void impGetBlinkTextTiming(drawinglayer::animation::AnimationEntryList& rAnimList) const;
