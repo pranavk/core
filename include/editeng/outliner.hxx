@@ -777,6 +777,7 @@ public:
     NonOverflowingText *GetNonOverflowingText() const;
     OverflowingText *GetOverflowingText() const;
     void ClearOverflowingParaNum();
+
     void            DepthChangedHdl();
     void            SetDepthChangedHdl(const Link<>& rLink){aDepthChangedHdl=rLink;}
     Link<>          GetDepthChangedHdl() const { return aDepthChangedHdl; }
@@ -817,7 +818,8 @@ public:
 
     void            SetStatusEventHdl( const Link<>& rLink );
     Link<>          GetStatusEventHdl() const;
-    void            SetStatusEventHdl1( const Link<>& rLink );
+
+    void            SetChainingEventHdl( const Link<>& rLink );
 
     void            Draw( OutputDevice* pOutDev, const Rectangle& rOutRect );
     void            Draw( OutputDevice* pOutDev, const Point& rStartPos, short nOrientation = 0 );
