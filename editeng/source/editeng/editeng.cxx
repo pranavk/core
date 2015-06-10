@@ -2773,6 +2773,11 @@ void EditEngine::ClearOverflowingParaNum() {
     pImpEditEngine->ClearOverflowingParaNum();
 }
 
+bool EditEngine::IsPageOverflow() {
+    pImpEditEngine->CheckPageOverflow();
+    return pImpEditEngine->IsPageOverflow();
+}
+
 EFieldInfo::EFieldInfo()
 {
     pFieldItem = NULL;
