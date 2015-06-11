@@ -2116,12 +2116,8 @@ NonOverflowingText *Outliner::GetNonOverflowingText() const
     // Only overflowing text, i.e. 1st line of 1st paragraph overflowing
     if ( nCount == 0 && nOverflowLine == 0)
     {
-        EditTextObject *pEmptyText = pEditEngine->GetEmptyTextObject();
-        OutlinerParaObject* pPObj = new OutlinerParaObject( *pEmptyText );
-        pPObj->SetOutlinerMode(GetMode());
-
-        delete pEmptyText;
-        return new NonOverflowingText(pPObj, "");
+        OutlinerParaObject* pEmptyPObj = GetEmptyParaObject();
+        return new NonOverflowingText(pEmptyPObj, "");
 
     } else if (nCount < 0) { // No overflowing Text: all para-s included
         nCount = GetParagraphCount();
@@ -2151,6 +2147,16 @@ NonOverflowingText *Outliner::GetNonOverflowingText() const
         pHeadParas = CreateParaObject(0, nCount);
 
     return new NonOverflowingText(pHeadParas, aPreOverflowingTxt);
+}
+
+OutlinerParaObject *Outliner::GetEmptyParaObject() const
+{
+    EditTextObject *pEmptyText = pEditEngine->GetEmptyTextObject();
+    OutlinerParaObject* pPObj = new OutlinerParaObject( *pEmptyText );
+    pPObj->SetOutlinerMode(GetMode());
+
+    delete pEmptyText;
+    return pPObj;
 }
 
 OverflowingText *Outliner::GetOverflowingText() const
