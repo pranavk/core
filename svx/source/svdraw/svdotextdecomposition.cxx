@@ -1654,6 +1654,8 @@ void SdrTextObj::impDecomposeChainedTextPrimitive(
 
     // If overflow occurs we have to cut the text at the right point
     if ( rOutliner.IsPageOverflow() ) {
+        // Save the overflowing text before changing the outliner's state
+        const_cast<SdrTextObj*>(this)->mpOverflowingText = rOutliner.GetOverflowingText();
         impLeaveOnlyNonOverflowingText(&rOutliner);
 
         // XXX: Order transfer of stuff in next link here
@@ -1664,7 +1666,7 @@ void SdrTextObj::impDecomposeChainedTextPrimitive(
         rOutliner.SetUpdateMode(true);
 
         /* Actual transfer of text */
-        const_cast<SdrTextObj*>(this)->mpOverflowingText = rOutliner.GetOverflowingText();
+
         if (GetNextLinkInChain())
             impMoveChainedTextToNextLink(&rChainingOutl, GetNextLinkInChain());
 
