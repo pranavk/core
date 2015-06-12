@@ -1658,7 +1658,6 @@ void SdrTextObj::impDecomposeChainedTextPrimitive(
         const_cast<SdrTextObj*>(this)->mpOverflowingText = rOutliner.GetOverflowingText();
         impLeaveOnlyNonOverflowingText(&rOutliner);
 
-        // XXX: Order transfer of stuff in next link here
         /* Get chaining outliner  here */
         // Code adapted from ImpGetDrawOutliner
         SdrOutliner &rChainingOutl = pModel->GetChainingOutliner(this);
