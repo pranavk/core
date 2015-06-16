@@ -1626,8 +1626,6 @@ void SdrTextObj::impDecomposeChainedTextPrimitive(
 
     /* Begin overflow handling */
 
-    TextChain *aTxtChain = new TextChain;
-
     // If overflow occurs we have to cut the text at the right point
     // If in edit mode ImpEditEngine should have taken care of this
     if ( rOutliner.IsPageOverflow() && !IsInEditMode()) {
