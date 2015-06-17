@@ -4081,7 +4081,6 @@ void ImpEditEngine::CallChainingEventHdl()
     // only if it's the right ImpEditEngine (with right info on changes in text)
     if ( aChainingHdlLink.IsSet() /* && aStatus.GetStatusWord() */)
     {
-        CheckPageOverflow();
         aChainingHdlLink.Call( &mbNeedsChainingHandling );
 
     }
