@@ -1667,7 +1667,7 @@ void SdrTextObj::impDecomposeChainedTextPrimitive(
 
     /* Begin underflow handling */
 
-    bool bIsPageUnderflow = rOutliner.IsPageOverflow() && !IsInEditMode();
+    bool bIsPageUnderflow = !rOutliner.IsPageOverflow() && !IsInEditMode();
     if (bIsPageUnderflow) {
 
         SdrTextObj *pNextLink = GetNextLinkInChain();
