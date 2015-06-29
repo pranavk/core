@@ -1652,6 +1652,7 @@ void SdrTextObj::impDecomposeChainedTextPrimitive(
         aTxtChainFlow.ExecuteUnderflow(&rOutliner);
         bIsOverflow = aTxtChainFlow.IsOverflow();
     } else {
+        // standard overflow (no underlow before)
         bIsOverflow = aTxtChainFlow.IsOverflow();
     }
 
@@ -1660,7 +1661,7 @@ void SdrTextObj::impDecomposeChainedTextPrimitive(
         SdrOutliner &rChainingOutl = pModel->GetChainingOutliner(this);
         ImpInitDrawOutliner( rChainingOutl );
         rChainingOutl.SetUpdateMode(true);
-
+        // We must pass the chaining outliner otherwise we would mess up decomposition
         aTxtChainFlow.ExecuteOverflow(&rOutliner, &rChainingOutl);
     }
 
