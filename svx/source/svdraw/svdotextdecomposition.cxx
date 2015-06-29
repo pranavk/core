@@ -1644,7 +1644,7 @@ void SdrTextObj::impDecomposeChainedTextPrimitive(
     TextChainFlow aTxtChainFlow(const_cast<SdrTextObj*>(this));
     bool bIsOverflow;
 
-    aTxtChainFlow.CheckForFlowEvents(&rOutliner, NULL); // seconod parameter is to check whether you have to "prepare" the outliner's parameters
+    aTxtChainFlow.CheckForFlowEvents(&rOutliner);
 
     if (aTxtChainFlow.IsUnderflow() && !IsInEditMode())
     {
