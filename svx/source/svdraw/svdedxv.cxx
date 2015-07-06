@@ -51,6 +51,7 @@
 #include "svx/svdstr.hrc"
 #include "svdglob.hxx"
 #include "svx/globl3d.hxx"
+#include <svx/textchain.hxx>
 #include <editeng/outliner.hxx>
 #include <editeng/adjustitem.hxx>
 #include <svtools/colorcfg.hxx>
@@ -495,8 +496,24 @@ IMPL_LINK_NOARG(SdrObjEditView,ImpChainingEventHdl)
             // trigger actual chaining
             pTextObj->onChainingEvent();
 
+            // XXX: this logic could be put in a separate approppriate class
             /* Cursor motion stuff */
+            CursorChainingEvent aCursorEvent = pTextObj->GetTextChain()->GetCursorEvent(pTextObj);
+            SdrTextObj *pNextLink = pTextObj->GetNextLinkInChain();
 
+            switch (aCursorEvent) {
+
+            case CursorChainingEvent::UNCHANGED:
+                    pOLV->SetSelection(aPreChainingSel);
+                    break;
+            case CursorChainingEvent::TO_NEXT_LINK:
+                    SdrEndTextEdit();
+                    SdrBeginTextEdit(pNextLink);
+                    break;
+            case CursorChainingEvent::TO_PREV_LINK:
+                    // XXX: To be handled
+                    break;
+            }
 
             // Find last Para
             /*
@@ -507,8 +524,6 @@ IMPL_LINK_NOARG(SdrObjEditView,ImpChainingEventHdl)
             // Selection at end of editing area
             ESelection aEndSel(nLastParaIndex,nLenLastPara,nLastParaIndex,nLenLastPara);
             */
-
-            pOLV->SetSelection(aPreChainingSel);
 
         } else {
             // XXX
@@ -758,7 +773,8 @@ bool SdrObjEditView::SdrBeginTextEdit(
 
             pTextEditOutlinerView->ShowCursor();
             pTextEditOutliner->SetStatusEventHdl(LINK(this,SdrObjEditView,ImpOutlinerStatusEventHdl));
-            pTextEditOutliner->SetChainingEventHdl(LINK(this,SdrObjEditView,ImpChainingEventHdl) );
+            if (pTextObj->IsChainable())
+                pTextEditOutliner->SetChainingEventHdl(LINK(this,SdrObjEditView,ImpChainingEventHdl) );
 
 #ifdef DBG_UTIL
             if (pItemBrowser!=nullptr) pItemBrowser->SetDirty();
@@ -807,15 +823,6 @@ bool SdrObjEditView::SdrBeginTextEdit(
                     OSL_ENSURE(false, "The document undo manager is not derived from SdrUndoManager (!)");
                 }
             }
-
-            // FIXME(matteocam)
-            // XXX: Trying to get to the next text obj directly
-            if (pTextObj->IsChainable()) {
-                SdrTextObj *pNextLink = pTextObj->GetNextLinkInChain();
-                SdrEndTextEdit();
-                SdrBeginTextEdit(pNextLink);
-            }
-
 
             return true; // ran fine, let TextEdit run now
         }

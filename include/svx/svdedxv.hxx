@@ -125,7 +125,7 @@ protected:
     void ImpMacroUp(const Point& rUpPos);
     void ImpMacroDown(const Point& rDownPos);
 
-       DECL_LINK( BeginPasteOrDropHdl, PasteOrDropInfos* );
+    DECL_LINK( BeginPasteOrDropHdl, PasteOrDropInfos* );
     DECL_LINK( EndPasteOrDropHdl, PasteOrDropInfos* );
 
 protected:
