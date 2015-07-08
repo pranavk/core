@@ -500,7 +500,7 @@ IMPL_LINK_NOARG(SdrObjEditView,ImpChainingEventHdl)
             pTextChain->SetNilChainingEvent(pTextObj, true);
 
             // Save previous selection pos
-            ESelection aPreChainingSel(pOLV->GetSelection());
+            maPreChainingSel = new ESelection(pOLV->GetSelection());
 
             // trigger actual chaining
             pTextObj->onChainingEvent();
@@ -508,22 +508,9 @@ IMPL_LINK_NOARG(SdrObjEditView,ImpChainingEventHdl)
             // XXX: this logic could be put in a separate approppriate class
             /* Cursor motion stuff */
 
-            CursorChainingEvent aCursorEvent = pTextChain->GetCursorEvent(pTextObj);
-            SdrTextObj *pNextLink = pTextObj->GetNextLinkInChain();
+            maCursorEvent = new CursorChainingEvent(pTextChain->GetCursorEvent(pTextObj));
+            //SdrTextObj *pNextLink = pTextObj->GetNextLinkInChain();
 
-            switch (aCursorEvent) {
-
-            case CursorChainingEvent::UNCHANGED:
-                    pOLV->SetSelection(aPreChainingSel);
-                    break;
-            case CursorChainingEvent::TO_NEXT_LINK:
-                    //SdrEndTextEdit(true);
-                    //SdrBeginTextEdit(pNextLink, nullptr, nullptr, false, nullptr, nullptr, true, true);
-                    break;
-            case CursorChainingEvent::TO_PREV_LINK:
-                    // XXX: To be handled
-                    break;
-            }
 
             // Find last Para
             /*
@@ -543,6 +530,47 @@ IMPL_LINK_NOARG(SdrObjEditView,ImpChainingEventHdl)
         }
     }
     return 0;
+}
+
+
+void SdrObjEditView::ImpMoveCursorAfterChainingEvent()
+{
+    if (!mxTextEditObj.is())
+        return;
+
+    SdrTextObj* pTextObj = dynamic_cast<SdrTextObj*>(mxTextEditObj.get());
+
+    if (!pTextObj->IsChainable() || !pTextObj->GetNextLinkInChain())
+        return;
+
+    assert(maCursorEvent);
+    assert(maPreChainingSel);
+
+    SdrTextObj *pNextLink = pTextObj->GetNextLinkInChain();
+    OutlinerView* pOLV = GetTextEditOutlinerView();
+
+    switch (*maCursorEvent) {
+
+            case CursorChainingEvent::UNCHANGED:
+                    pOLV->SetSelection(*maPreChainingSel);
+                    break;
+            case CursorChainingEvent::TO_NEXT_LINK:
+                    SdrEndTextEdit();
+                    SdrBeginTextEdit(pNextLink);
+
+                    //SdrEndTextEdit(true);
+                    //SdrBeginTextEdit(pNextLink, nullptr, nullptr, false, nullptr, nullptr, true, true);
+                    break;
+            case CursorChainingEvent::TO_PREV_LINK:
+                    // XXX: To be handled
+                    break;
+    }
+
+    // Default case
+    // XXX: You should delete the old ones here too.
+    maCursorEvent = NULL;
+    maPreChainingSel = NULL;
+
 }
 
 IMPL_LINK(SdrObjEditView,ImpOutlinerCalcFieldValueHdl,EditFieldInfo*,pFI)
@@ -1274,6 +1302,10 @@ bool SdrObjEditView::KeyInput(const KeyEvent& rKEvt, vcl::Window* pWin)
             if (pItemBrowser!=nullptr) pItemBrowser->SetDirty();
 #endif
             ImpMakeTextCursorAreaVisible();
+
+            // FIXME(matteocam)
+            ImpMoveCursorAfterChainingEvent();
+
             return true;
         }
     }
