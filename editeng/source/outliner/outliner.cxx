@@ -2144,7 +2144,6 @@ NonOverflowingText *Outliner::GetNonOverflowingText() const
             nLen += GetLineLen(nOverflowingPara, nLine);
         }
 
-        /* BEGIN Experiment with ESelection and EditTextobject */
         sal_Int32 nStartPara = 0;
         sal_Int32 nStartPos = 0;
         ESelection aNonOverflowingTextSelection;
@@ -2201,7 +2200,6 @@ OverflowingText *Outliner::GetOverflowingText() const
         nLen += GetLineLen(nHeadPara, nLine);
     }
 
-    /* BEGIN experiment ESEL */
     sal_uInt32 nOverflowingPara = pEditEngine->GetOverflowingParaNum();
     ESelection aOverflowingTextSel;
     sal_Int32 nLastPara = nParaCount-1;
@@ -2211,9 +2209,6 @@ OverflowingText *Outliner::GetOverflowingText() const
 
     EditTextObject *pTObj = pEditEngine->CreateTextObject(aOverflowingTextSel);
     return new OverflowingText(pTObj);
-
-    /* END experiment ESel */
-
 }
 
 void Outliner::ClearOverflowingParaNum()
