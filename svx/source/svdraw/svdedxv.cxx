@@ -553,6 +553,9 @@ void SdrObjEditView::ImpMoveCursorAfterChainingEvent()
                     break;
     }
 
+    // Reset event
+    pTextChain->SetCursorEvent(pTextObj, CursorChainingEvent::UNCHANGED);
+
 }
 
 IMPL_LINK(SdrObjEditView,ImpOutlinerCalcFieldValueHdl,EditFieldInfo*,pFI)
