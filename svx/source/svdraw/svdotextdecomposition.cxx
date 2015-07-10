@@ -1425,11 +1425,6 @@ void SdrTextObj::impGetScrollTextTiming(drawinglayer::animation::AnimationEntryL
 
 void SdrTextObj::impHandleChainingEventsDuringDecomposition(SdrOutliner &rOutliner) const
 {
-    if (GetTextChain()->GetJustHandledUnderflow(this)) {
-        GetTextChain()->SetJustHandledUnderflow(this, false);
-        return;
-    }
-
     GetTextChain()->SetNilChainingEvent(this, true);
 
     TextChainFlow aTxtChainFlow(const_cast<SdrTextObj*>(this));
@@ -1442,8 +1437,6 @@ void SdrTextObj::impHandleChainingEventsDuringDecomposition(SdrOutliner &rOutlin
         // underflow-induced overflow
         aTxtChainFlow.ExecuteUnderflow(&rOutliner);
         bIsOverflow = aTxtChainFlow.IsOverflow();
-
-        GetTextChain()->SetJustHandledUnderflow(this, true);
     } else {
         // standard overflow (no underlow before)
         bIsOverflow = aTxtChainFlow.IsOverflow();
