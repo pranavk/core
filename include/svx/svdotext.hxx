@@ -626,6 +626,7 @@ public:
         drawinglayer::primitive2d::Primitive2DSequence& rTarget,
         const drawinglayer::primitive2d::SdrChainedTextPrimitive2D& rSdrChainedTextPrimitive,
         const drawinglayer::geometry::ViewInformation2D& aViewInformation) const;
+    void impHandleChainingEventsDuringDecomposition(SdrOutliner &rOutliner) const;
 
 
     // timing generators
