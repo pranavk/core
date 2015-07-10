@@ -491,6 +491,11 @@ IMPL_LINK_NOARG(SdrObjEditView,ImpChainingEventHdl)
         if( pTextObj && pOLV)
         {
             TextChain *pTextChain = pTextObj->GetTextChain();
+
+             // XXX: IsChainable and GetNilChainingEvent are a bit mixed up atm
+            if (!pTextObj->IsChainable()) {
+                return 0;
+            }
             // This is true during an underflow-caused overflow (with pEdtOutl->SetText())
             if (pTextChain->GetNilChainingEvent(pTextObj)) {
                 return 0;
