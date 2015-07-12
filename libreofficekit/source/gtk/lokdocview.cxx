@@ -1630,6 +1630,27 @@ lok_doc_view_get_edit (LOKDocView* pDocView)
     return priv->m_bEdit;
 }
 
+struct PostCommandCallbackData
+{
+    const char* m_pCommand;
+    const char* m_pArguments;
+
+    PostCommandCallbackData(const char* pCommand, const char* pArguments)
+        : m_pCommand(pCommand),
+          m_pArguments(pArguments) {}
+};
+
+static void
+lok_doc_view_post_command_func (GTask* task, gpointer source_object, gpointer task_data, GCancellable*)
+{
+    LOKDocView* pDocView = LOK_DOC_VIEW(source_object);
+    LOKDocViewPrivate *priv = static_cast<LOKDocViewPrivate*>(lok_doc_view_get_instance_private (pDocView));
+
+    PostCommandCallbackData* pCallback = static_cast<PostCommandCallbackData*>(task_data);
+
+    priv->m_pDocument->pClass->postUnoCommand(priv->m_pDocument, pCallback->m_pCommand, pCallback->m_pArguments);
+}
+
 /**
  * lok_doc_view_post_command:
  * @pDocView: the #LOKDocView instance
@@ -1644,7 +1665,13 @@ lok_doc_view_post_command (LOKDocView* pDocView,
                            const char* pArguments)
 {
     LOKDocViewPrivate *priv = static_cast<LOKDocViewPrivate*>(lok_doc_view_get_instance_private (pDocView));
-    priv->m_pDocument->pClass->postUnoCommand(priv->m_pDocument, pCommand, pArguments);
+    GTask* task;
+    PostCommandCallbackData* pCallback = new PostCommandCallbackData(pCommand, pArguments);
+
+    task = g_task_new(pDocView, NULL, NULL, NULL);
+    g_task_set_task_data(task, pCallback, NULL);
+    g_task_run_in_thread(task, lok_doc_view_post_command_func);
+    g_object_unref(task);
 }
 
 /**
