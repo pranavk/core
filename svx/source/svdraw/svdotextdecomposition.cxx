@@ -1425,7 +1425,7 @@ void SdrTextObj::impGetScrollTextTiming(drawinglayer::animation::AnimationEntryL
 
 void SdrTextObj::impHandleChainingEventsDuringDecomposition(SdrOutliner &rOutliner) const
 {
-    GetTextChain()->SetNilChainingEvent(this, true);
+    //GetTextChain()->SetNilChainingEvent(this, true);
 
     TextChainFlow aTxtChainFlow(const_cast<SdrTextObj*>(this));
     bool bIsOverflow;
@@ -1451,7 +1451,7 @@ void SdrTextObj::impHandleChainingEventsDuringDecomposition(SdrOutliner &rOutlin
         aTxtChainFlow.ExecuteOverflow(&rOutliner, &rChainingOutl);
     }
 
-    GetTextChain()->SetNilChainingEvent(this, false);
+    //GetTextChain()->SetNilChainingEvent(this, false);
 }
 
 void SdrTextObj::impDecomposeChainedTextPrimitive(
