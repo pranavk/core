@@ -422,7 +422,6 @@ void SAL_CALL ChartController::attachFrame(
         m_apDropTargetHelper.reset();
     }
     {
-        SAL_DEBUG("attached frame");
         // calls to VCL
         SolarMutexGuard aSolarGuard;
         m_pChartWindow = VclPtr<ChartWindow>::Create(this,pParent,pParent?pParent->GetStyle():0);
@@ -817,7 +816,6 @@ void SAL_CALL ChartController::dispose()
             m_xLayoutManagerEventBroadcaster.set( 0 );
         }
 
-        SAL_DEBUG("disposing");
         m_xFrame.clear();
         m_xUndoManager.clear();
 
@@ -936,7 +934,6 @@ void SAL_CALL ChartController::notifyClosing(
             try
             {
                 xFrameCloseable->close( sal_False /* DeliverOwnership */ );
-                SAL_DEBUG("notifyClosing");
                 m_xFrame.clear();
             }
             catch( const util::CloseVetoException & )
