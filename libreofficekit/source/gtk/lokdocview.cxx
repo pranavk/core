@@ -1591,6 +1591,29 @@ lok_doc_view_set_partmode(LOKDocView* pDocView,
     priv->m_pDocument->pClass->setPartMode( priv->m_pDocument, nPartMode );
 }
 
+static void
+lok_doc_view_set_edit_func(GTask*,
+                           gpointer source_object,
+                           gpointer task_data,
+                           GCancellable*)
+{
+    LOKDocView* pDocView = LOK_DOC_VIEW(source_object);
+    LOKDocViewPrivate *priv = static_cast<LOKDocViewPrivate*>(lok_doc_view_get_instance_private (pDocView));
+    gboolean bWasEdit = priv->m_bEdit;
+    gboolean* pEdit = static_cast<gboolean*>(task_data);
+
+    if (!priv->m_bEdit && *pEdit)
+        g_info("lok_doc_view_set_edit: entering edit mode");
+    else if (priv->m_bEdit && !*pEdit)
+    {
+        g_info("lok_doc_view_set_edit: leaving edit mode");
+        priv->m_pDocument->pClass->resetSelection(priv->m_pDocument);
+    }
+    priv->m_bEdit = *pEdit;
+    g_signal_emit(pDocView, doc_view_signals[EDIT_CHANGED], 0, bWasEdit);
+    gtk_widget_queue_draw(GTK_WIDGET(pDocView));
+}
+
 /**
  * lok_doc_view_set_edit:
  * @pDocView: The #LOKDocView instance
@@ -1602,19 +1625,11 @@ SAL_DLLPUBLIC_EXPORT void
 lok_doc_view_set_edit(LOKDocView* pDocView,
                       gboolean bEdit)
 {
-    LOKDocViewPrivate *priv = static_cast<LOKDocViewPrivate*>(lok_doc_view_get_instance_private (pDocView));
-    gboolean bWasEdit = priv->m_bEdit;
-
-    if (!priv->m_bEdit && bEdit)
-        g_info("lok_doc_view_set_edit: entering edit mode");
-    else if (priv->m_bEdit && !bEdit)
-    {
-        g_info("lok_doc_view_set_edit: leaving edit mode");
-        priv->m_pDocument->pClass->resetSelection(priv->m_pDocument);
-    }
-    priv->m_bEdit = bEdit;
-    g_signal_emit(pDocView, doc_view_signals[EDIT_CHANGED], 0, bWasEdit);
-    gtk_widget_queue_draw(GTK_WIDGET(pDocView));
+    GTask* task = g_task_new(pDocView, NULL, NULL, NULL);
+    gboolean* pEdit = new gboolean(bEdit);
+    g_task_set_task_data(task, pEdit, g_free);
+    g_task_run_in_thread(task, lok_doc_view_set_edit_func);
+    g_object_unref(task);
 }
 
 /**
@@ -1641,7 +1656,7 @@ struct PostCommandCallbackData
 };
 
 static void
-lok_doc_view_post_command_func (GTask* task, gpointer source_object, gpointer task_data, GCancellable*)
+lok_doc_view_post_command_func (GTask*, gpointer source_object, gpointer task_data, GCancellable*)
 {
     LOKDocView* pDocView = LOK_DOC_VIEW(source_object);
     LOKDocViewPrivate *priv = static_cast<LOKDocViewPrivate*>(lok_doc_view_get_instance_private (pDocView));
@@ -1664,12 +1679,11 @@ lok_doc_view_post_command (LOKDocView* pDocView,
                            const char* pCommand,
                            const char* pArguments)
 {
-    LOKDocViewPrivate *priv = static_cast<LOKDocViewPrivate*>(lok_doc_view_get_instance_private (pDocView));
     GTask* task;
     PostCommandCallbackData* pCallback = new PostCommandCallbackData(pCommand, pArguments);
 
     task = g_task_new(pDocView, NULL, NULL, NULL);
-    g_task_set_task_data(task, pCallback, NULL);
+    g_task_set_task_data(task, pCallback, g_free);
     g_task_run_in_thread(task, lok_doc_view_post_command_func);
     g_object_unref(task);
 }
