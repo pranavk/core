@@ -1569,11 +1569,28 @@ lok_doc_view_get_part (LOKDocView* pDocView)
     return priv->m_pDocument->pClass->getPart( priv->m_pDocument );
 }
 
+static void
+lok_doc_view_set_part_func(GTask*,
+                           gpointer source_object,
+                           gpointer task_data,
+                           GCancellable*)
+{
+    LOKDocView* pDocView = LOK_DOC_VIEW(source_object);
+    LOKDocViewPrivate *priv = static_cast<LOKDocViewPrivate*>(lok_doc_view_get_instance_private (pDocView));
+    int* pPart = static_cast<int*>(task_data);
+
+    priv->m_pDocument->pClass->setPart( priv->m_pDocument, *pPart );
+}
+
 SAL_DLLPUBLIC_EXPORT void
 lok_doc_view_set_part (LOKDocView* pDocView, int nPart)
 {
-    LOKDocViewPrivate *priv = static_cast<LOKDocViewPrivate*>(lok_doc_view_get_instance_private (pDocView));
-    priv->m_pDocument->pClass->setPart( priv->m_pDocument, nPart );
+    GTask* task = g_task_new(pDocView, NULL, NULL, NULL);
+    int* pPart = new int(nPart);
+    g_task_set_task_data(task, pPart, g_free);
+    g_task_run_in_thread(task, lok_doc_view_set_part_func);
+    g_object_unref(task);
+
 }
 
 SAL_DLLPUBLIC_EXPORT char*
