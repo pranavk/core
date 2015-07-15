@@ -225,6 +225,35 @@ isEmptyRectangle(const GdkRectangle& rRectangle)
     return rRectangle.x == 0 && rRectangle.y == 0 && rRectangle.width == 0 && rRectangle.height == 0;
 }
 
+struct PostKeyCallbackData
+{
+    int m_nType;
+    int m_nCharCode;
+    int m_nKeyCode;
+
+    PostKeyCallbackData(int nType, int nCharCode, int nKeyCode)
+        : m_nType(nType),
+          m_nCharCode(nCharCode),
+          m_nKeyCode(nKeyCode) {}
+};
+
+static void
+postKeyEventFunc(GTask*,
+                 gpointer source_object,
+                 gpointer task_data,
+                 GCancellable*)
+{
+    LOKDocView* pDocView = LOK_DOC_VIEW(source_object);
+    LOKDocViewPrivate *priv = static_cast<LOKDocViewPrivate*>(lok_doc_view_get_instance_private (pDocView));
+
+    PostKeyCallbackData* pCallback = static_cast<PostKeyCallbackData*>(task_data);
+
+    priv->m_pDocument->pClass->postKeyEvent(priv->m_pDocument,
+                                            pCallback->m_nType,
+                                            pCallback->m_nCharCode,
+                                            pCallback->m_nKeyCode);
+}
+
 static gboolean
 signalKey (GtkWidget* pWidget, GdkEventKey* pEvent)
 {
@@ -281,10 +310,27 @@ signalKey (GtkWidget* pWidget, GdkEventKey* pEvent)
     if (pEvent->state & GDK_SHIFT_MASK)
         nKeyCode |= KEY_SHIFT;
 
+
     if (pEvent->type == GDK_KEY_RELEASE)
-        priv->m_pDocument->pClass->postKeyEvent(priv->m_pDocument, LOK_KEYEVENT_KEYUP, nCharCode, nKeyCode);
+    {
+        GTask* task = g_task_new(pDocView, NULL, NULL, NULL);
+        PostKeyCallbackData* pCallback = new PostKeyCallbackData(LOK_KEYEVENT_KEYUP,
+                                                                 nCharCode,
+                                                                 nKeyCode);
+        g_task_set_task_data(task, pCallback, g_free);
+        g_task_run_in_thread(task, postKeyEventFunc);
+        g_object_unref(task);
+    }
     else
-        priv->m_pDocument->pClass->postKeyEvent(priv->m_pDocument, LOK_KEYEVENT_KEYINPUT, nCharCode, nKeyCode);
+    {
+        GTask* task = g_task_new(pDocView, NULL, NULL, NULL);
+        PostKeyCallbackData* pCallback = new PostKeyCallbackData(LOK_KEYEVENT_KEYINPUT,
+                                                                 nCharCode,
+                                                                 nKeyCode);
+        g_task_set_task_data(task, pCallback, g_free);
+        g_task_run_in_thread(task, postKeyEventFunc);
+        g_object_unref(task);
+    }
 
     return FALSE;
 }
