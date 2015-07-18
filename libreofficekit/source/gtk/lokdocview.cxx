@@ -715,6 +715,13 @@ renderGraphicHandle(LOKDocView* pDocView,
     }
 }
 
+static void
+renderDocumentCallback(GObject* source_object, GAsyncResult* res, gpointer)
+{
+    LOKDocView* pDocView = LOK_DOC_VIEW(source_object);
+    gtk_widget_queue_draw(GTK_WIDGET(pDocView));
+}
+
 
 static gboolean
 renderDocument(LOKDocView* pDocView, cairo_t* pCairo)
@@ -732,7 +739,7 @@ renderDocument(LOKDocView* pDocView, cairo_t* pCairo)
     aVisibleArea.y = pixelToTwip (aVisibleArea.y, priv->m_fZoom);
     aVisibleArea.width = pixelToTwip (aVisibleArea.width, priv->m_fZoom);
     aVisibleArea.height = pixelToTwip (aVisibleArea.height, priv->m_fZoom);
-
+    gboolean status = true;
     // Render the tiles.
     for (guint nRow = 0; nRow < nRows; ++nRow)
     {
@@ -764,17 +771,23 @@ renderDocument(LOKDocView* pDocView, cairo_t* pCairo)
 
             if (bPaint)
             {
-                Tile& currentTile = priv->m_aTileBuffer.getTile(nRow, nColumn, priv->m_fZoom);
-                GdkPixbuf* pPixBuf = currentTile.getBuffer();
-                gdk_cairo_set_source_pixbuf (pCairo, pPixBuf,
-                                             twipToPixel(aTileRectangleTwips.x, priv->m_fZoom),
-                                             twipToPixel(aTileRectangleTwips.y, priv->m_fZoom));
-                cairo_paint(pCairo);
+                GTask* task = g_task_new(pDocView, NULL, renderDocumentCallback, NULL);
+                gboolean status_tmp;
+                Tile& currentTile = priv->m_aTileBuffer.getTile(nRow, nColumn, priv->m_fZoom, &status_tmp, task);
+                if (!status_tmp)
+                    status = status_tmp;
+                if (status_tmp) {
+                    GdkPixbuf* pPixBuf = currentTile.getBuffer();
+                    gdk_cairo_set_source_pixbuf (pCairo, pPixBuf,
+                                                 twipToPixel(aTileRectangleTwips.x, priv->m_fZoom),
+                                                 twipToPixel(aTileRectangleTwips.y, priv->m_fZoom));
+                    cairo_paint(pCairo);
+                }
             }
         }
     }
 
-    return FALSE;
+    return status;
 }
 
 static gboolean
@@ -1148,8 +1161,8 @@ static gboolean lok_doc_view_draw (GtkWidget* pWidget, cairo_t* pCairo)
 {
     LOKDocView *pDocView = LOK_DOC_VIEW (pWidget);
 
-    renderDocument (pDocView, pCairo);
-    renderOverlay (pDocView, pCairo);
+    gboolean status = renderDocument (pDocView, pCairo);
+    if (status) renderOverlay (pDocView, pCairo);
 
     return FALSE;
 }
