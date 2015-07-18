@@ -73,10 +73,54 @@ void TileBuffer::setInvalid(int x, int y)
     }
 }
 
-Tile& TileBuffer::getTile(int x, int y, float aZoom)
+static void getTileFunc(GTask* task, gpointer source_object, gpointer task_data, GCancellable*)
+{
+    GdkPixbuf* pPixBuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, nTileSizePixels, nTileSizePixels);
+    GetTileCallbackData* pCallback = static_cast<GetTileCallbackData*>(task_data);
+    TileBuffer* buffer = pCallback->m_pBuffer;
+    int index = pCallback->m_nX * buffer->m_nWidth + pCallback->m_nY;
+    if (!pPixBuf)
+    {
+        g_info ("Error allocating memory to pixbuf");
+        return;
+    }
+
+    unsigned char* pBuffer = gdk_pixbuf_get_pixels(pPixBuf);
+    GdkRectangle aTileRectangle;
+    aTileRectangle.x = pixelToTwip(nTileSizePixels, pCallback->m_fZoom) * pCallback->m_nY;
+    aTileRectangle.y = pixelToTwip(nTileSizePixels, pCallback->m_fZoom) * pCallback->m_nX;
+
+    g_test_timer_start();
+    buffer->m_pLOKDocument->pClass->paintTile(buffer->m_pLOKDocument,
+                                      pBuffer,
+                                      nTileSizePixels, nTileSizePixels,
+                                      aTileRectangle.x, aTileRectangle.y,
+                                      pixelToTwip(nTileSizePixels, pCallback->m_fZoom),
+                                      pixelToTwip(nTileSizePixels, pCallback->m_fZoom));
+
+    double elapsedTime = g_test_timer_elapsed();
+    g_info ("Rendered (%d, %d) in %f seconds",
+            pCallback->m_nX,
+            pCallback->m_nY,
+            elapsedTime);
+
+    //create a mapping for it
+    buffer->m_mTiles[index].setPixbuf(pPixBuf);
+    buffer->m_mTiles[index].valid = true;
+}
+
+Tile& TileBuffer::getTile(int x, int y, float aZoom, GTask* task)
 {
     int index = x * m_nWidth + y;
-    if(m_mTiles.find(index) == m_mTiles.end() || !m_mTiles[index].valid)
+
+    if (!m_mTiles[index].valid)
+    {
+        GetTileCallbackData* pCallback = new GetTileCallbackData(x, y, aZoom, this);
+        g_task_set_task_data(task, pCallback, g_free);
+        g_task_run_in_thread(task, getTileFunc);
+        return m_mTiles[index];
+    }
+    else if(m_mTiles.find(index) == m_mTiles.end())
     {
 
         GdkPixbuf* pPixBuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, TRUE, 8, nTileSizePixels, nTileSizePixels);

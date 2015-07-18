@@ -741,6 +741,12 @@ renderGraphicHandle(LOKDocView* pDocView,
     }
 }
 
+static void
+rdcb(GObject* source_object, GAsyncResult* res, gpointer)
+{
+    LOKDocView* pDocView = LOK_DOC_VIEW(source_object);
+    gtk_widget_queue_draw(GTK_WIDGET(pDocView));
+}
 
 static gboolean
 renderDocument(LOKDocView* pDocView, cairo_t* pCairo)
@@ -790,7 +796,9 @@ renderDocument(LOKDocView* pDocView, cairo_t* pCairo)
 
             if (bPaint)
             {
-                Tile& currentTile = priv->m_aTileBuffer.getTile(nRow, nColumn, priv->m_fZoom);
+                GTask* task = g_task_new(pDocView, NULL, rdcb, NULL);
+                Tile& currentTile = priv->m_aTileBuffer.getTile(nRow, nColumn, priv->m_fZoom, task);
+
                 GdkPixbuf* pPixBuf = currentTile.getBuffer();
                 gdk_cairo_set_source_pixbuf (pCairo, pPixBuf,
                                              twipToPixel(aTileRectangleTwips.x, priv->m_fZoom),

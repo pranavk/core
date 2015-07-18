@@ -104,7 +104,7 @@ class TileBuffer
 
        @return the tile at the mentioned position (x, y)
      */
-    Tile& getTile(int x, int y, float aZoom);
+    Tile& getTile(int x, int y, float aZoom, GTask*);
     /// Destroys all the tiles in the tile buffer; also frees the memory allocated
     /// for all the Tile objects.
     void resetAllTiles();
@@ -117,7 +117,7 @@ class TileBuffer
      */
     void setInvalid(int x, int y);
 
- private:
+
     /// Contains the reference to the LOK Document that this tile buffer is for.
     LibreOfficeKitDocument *m_pLOKDocument;
     /// Stores all the tiles cached by this tile buffer.
@@ -125,6 +125,21 @@ class TileBuffer
     /// Width of the current tile buffer (number of columns)
     int m_nWidth;
 };
+
+struct GetTileCallbackData
+{
+    int m_nX;
+    int m_nY;
+    float m_fZoom;
+    TileBuffer* m_pBuffer;
+
+    GetTileCallbackData(int x, int y, float zoom, TileBuffer* buffer)
+        : m_nX(x),
+          m_nY(y),
+          m_fZoom(zoom),
+          m_pBuffer(buffer) { }
+};
+
 
 #endif // INCLUDED_TILEBUFFER_HXX
 
